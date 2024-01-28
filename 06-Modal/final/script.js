@@ -21,6 +21,7 @@ for (let i = 0; i < btnsOpenModal.length; i++)
 btnCloseModal.addEventListener('click', closeModal);
 overlay.addEventListener('click', closeModal);
 
+// We are just defining function, and asking JS to pass the event object to e
 document.addEventListener('keydown', function (e) {
   // console.log(e.key);
 

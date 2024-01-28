@@ -64,6 +64,7 @@ function addDecl(a, b) {
   return a + b;
 }
 
+// Because this function here is now declared as a constant variable
 const addExpr = function (a, b) {
   return a + b;
 };
@@ -230,4 +231,3 @@ jessicaCopy.family.push('John');
 console.log('Before marriage:', jessica2);
 console.log('After marriage: ', jessicaCopy);
 */
-
