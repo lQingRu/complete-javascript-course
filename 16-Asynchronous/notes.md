@@ -1,4 +1,4 @@
-# Introduction
+                                                                                                          # Introduction
 
 - Synchronous code
   - Each line of code waits for prev line to finish
@@ -175,4 +175,176 @@ wait(2)
   })
   // have to do this again like a sequential Ajax call, because wait() returns a promise
   .then(() => console.log('I waited for 1 second'));
+```
+
+## Consuming promises with `async await`
+
+- `async await` is just a syntatic sugar
+- Before `async await`
+
+```js
+fetch(`https://restcountries.eu/rest/v2/name/${country}`).then(res =>
+  console.log(res)
+);
+```
+
+```js
+const whereAmI = async function (country) {
+  // Geolocation
+  const pos = await getPosition();
+  const { latitude: lat, longitude: lng } = pos.coords;
+
+  // Reverse geocding
+  const resGeo = await fetch(`https://geocode.xyz/${lat}, ${lng}?geoit=json`);
+  const dataGeo = await resGeo.json();
+  console.log(dataGeo);
+
+  // Country data
+  const res = await fetch(`https://restcountries.eu/rest/v2/name/${country}`);
+  const data = await res.json();
+  console.log(data);
+};
+
+whereAmI('portugal');
+console.log('FIRST');
+```
+
+## Exception handling with `try..`
+
+```js
+const whereAmI = async function (country) {
+  // Country data
+  try {
+    const res = await fetch(`https://restcountries.eu/rest/v2/name/${country}`);
+    if (!res.ok) throw new Error('Problem getting country');
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.log(`${err} occured`);
+  }
+};
+```
+
+## Returning values from `async` functions
+
+- `async` will always return a `Promise` and not values
+
+```js
+const whereAmI = async function (country) {
+  // Country data
+  try {
+    const res = await fetch(`https://restcountries.eu/rest/v2/name/${country}`);
+    const data = await res.json();
+    return `You are in ${data.Geo.city}`;
+  } catch (err) {
+    console.error(`${err}`);
+
+    // We will need to throw error to reject the promise returned from the async function
+    throw err;
+  }
+};
+
+// If we just do this, we will not reach the catch() because the Promise is still fulfilled, hence only the then() will be done
+whereAmI()
+  .then(city => console.log(`2: ${city}`))
+  .catch(err => console.error(`2: ${err.message}`))
+  .finally(() => console.log('done'));
+```
+
+- This will work, but we are mixing the old and new way of working with promises
+
+  - Prefer to always use async functions instead of mixing them
+
+- It will be great if we could use `await` without the `async` function but that does not really work for now as `await` can only be used inside an `async function`
+
+  - HENCE, since we don't want to create a new function, we can use immediately invoked function expressions (IIFE)
+
+- Converted:
+
+```js
+// Treat whereAmI() as any other Promises, so can just convert to async/await
+(async function()){
+  try{
+    const city = await whereAmI();
+    console.log(`2:${city}`);
+  }
+  catch (err){
+    console.error(`2: ${err.message}`);
+  }
+
+  console.log('3: finished');
+}
+```
+
+- List of `Promises`
+
+```js
+const imgs = imgArr.map(async img => await createImage(img)); // List of Promises
+const imgsEl = await Promise.all(imgs); // List of images
+```
+
+## Running Promises in parallel
+
+- Instead of running Promises in sequential:
+  ![alt text](image-3.png)
+
+```js
+const get3Countries = function(){
+
+  // 1 rejected promise is enough to reject the whole thing
+  try {
+    const data = await Promise.all([getJson(`https://restcountries.eu/rest/v2/name/${c1}`), getJson(`https://restcountries.eu/rest/v2/name/${c2}`), getJson(`https://restcountries.eu/rest/v2/name/${c3}`,)]);
+    console.log(data.map(d => d[0].capital));
+  }
+  catch (err){
+    console.error(err);
+  }
+});
+```
+
+- If there are multiple async operations at the same time and operations do not depend on one another, can use `Promise.all()`
+- `Promise.all()` is one of the combinators
+
+## Other `Promise` combinators
+
+### `Promise.race`
+
+- Return whatever data that returns first
+  - To prevent a `Promise` that takes too long, we can also include `timeout`
+
+```js
+const timeout = function (sec) {
+  return new Promise(function (_, reject) {
+    setTimeout(function () {
+      reject(new Error('Requst too long'));
+    }, sec * 1000);
+  });
+};
+
+Promise.race([
+  getJson(`https://restcountries.eu/rest/v2/name/tanzania`),
+  timeout(5),
+])
+  .then(res => console.log(res[0]))
+  .catch(err => console.error(err));
+```
+
+### `Promise.allSettled`
+
+- Will not short circuit like `Promise.all()`
+
+```js
+Promise.allSettled([Promise.resolve('Success'), Promise.reject('Error')]).then(
+  res => console.log(res)).catch(err => console.error(err));
+);
+```
+
+### `Promise.any` [ES2021]
+
+- `Promise.any` very similar to `Promise.all`, but `Promise.any` will skip all those rejected ones
+
+```js
+Promise.any([Promise.resolve('Success'), Promise.reject('Error')]).then(
+  res => console.log(res)).catch(err => console.error(err));
+);
 ```
