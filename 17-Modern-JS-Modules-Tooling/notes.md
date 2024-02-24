@@ -9,6 +9,13 @@
 - `npm i xx` vs `npm i xx -g`
   - `-g`: To install globally, so as to use in every directory without the intermediate step of an NPM script
   - locally: Recommended so that we can always stay on the latest version
+- `--save-dev` (or `-D`)
+
+  - To install a package as a development dependency
+    - i.e. the package is essential for development tasks like compilation, testing, linting, and other build processes, but not directly required for the final production code that runs in your application
+
+- Resources:
+  - [npm install](https://docs.npmjs.com/cli/v7/commands/npm-install#:%7E:text=is%20not%20valid.-,npm%20install%20%3Calias%3E%40npm%3A%3Cname%3E,-%3A)
 
 ## Step 1 Build Process: Bundling
 
@@ -173,3 +180,75 @@ const {addToCart} = require('./shoppingCart.js')
 - There is still feature that is not polyfilled by `import 'core-js/stable'`:
   - Will need to install this file: `regenerator-runtime/runtime`
   - To allow polyfilling `async functions`
+
+# Writing clean and modern JS
+
+## General
+
+- Use DRY principle
+- Don't pollute global namespace, encapsulate instead
+- Don't use `var`
+- Use strongtype checks (`===` and `!==`)
+
+## Functions
+
+- Don't use more than 3 function parameters
+- Use default parameters whenever possible
+- Generally, return same data type as received
+- Use arrow functions for readability
+
+## OOP
+
+- Use ES6 classes
+- Encapsulate data and don't mutate it from outside the class
+- Implement method chaining
+- Do not use arrow functions as methods (in regular objects)
+
+## Avoid nested code
+
+- Use early `return` (guard clauses)
+- Use ternary (conditional) or logical operations instead of `if`
+- Use multiple `if` instead of `if/else-if`
+- Avoid `for` loops, use array methods instead (e.g.: `map`)
+- Avoid callback-based asynchronous APIs
+
+## Asynchronous code
+
+- Consume promises with `async/await` for best readability
+  - Instead of `then`, `catch`
+- Whenever possible, run promises in `parallel` (`Promise.all`)
+- Handle errors and promise rejections
+
+# Imperative & Declarative paradigm
+
+- Declarative paradigm has given rise to a sub paradigm called `functional programming`
+
+## Functional programming
+
+- Declarative programming paradigm
+- Based on the idea of writing software by combining many **pure functions, avoiding side effects and mutating data**
+  - Side effect: Mutation of any data outsiede of the function (e.g.: mutating external variables)
+  - Pure function: Function without side effects
+    - Does not depend on external variables
+    - Given same inputs, always returns same outputs
+  - Immutability: State(data) is never modified
+    - State is instead copied and copy is mutated and return
+    - Easier to keep track of how data flows through entire application = allows write better code with less bugs
+- Examples: React, Redux
+
+### Techniques
+
+- Try to avoid data mutations
+  - e.g.: `Object.freeze(..)`
+  - Copy the object and return instead
+- Use built-in methods that don't produce side effects
+- Do data transformations with methods like `.map()`, `.filter()`, `.reduce()`
+- Try to avoid side effects in functions
+  - BUT will be hard to avoid totally, because still need to display something on DOM / log something to console at times
+
+### Declarative syntax
+
+- Use array and object destructuring
+- Use spread operator
+- Use ternary operator
+- Use template literals
